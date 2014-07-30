@@ -21,7 +21,7 @@ public class GuiWoodenKineticEnergyCube extends GuiContainer {
      */
     protected void drawGuiContainerForegroundLayer(int par1, int par2)
     {
-        this.fontRenderer.drawString("Wooden Kinetic Energy Cube", 5, 6, 4210752);
+        this.fontRendererObj.drawString("Wooden Kinetic Energy Cube", 5, 6, 4210752);
     }
 
     /**

@@ -17,8 +17,7 @@ import net.minecraft.item.ItemTool;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.common.ForgeDirection;
-import net.minecraftforge.common.ForgeDummyContainer;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class StoneKineticEnergyCubeTileEntity extends BaseKineticEnergyCubeTileEntity implements ISidedInventory
 {
@@ -153,12 +152,12 @@ public class StoneKineticEnergyCubeTileEntity extends BaseKineticEnergyCubeTileE
     public void readFromNBT(NBTTagCompound par1NBTTagCompound)
     {
         super.readFromNBT(par1NBTTagCompound);
-        NBTTagList nbttaglist = par1NBTTagCompound.getTagList("Items");
+        NBTTagList nbttaglist = par1NBTTagCompound.getTagList("Items", 0);
         this.itemStacks = new ItemStack[this.getSizeInventory()];
 
         for (int i = 0; i < nbttaglist.tagCount(); ++i)
         {
-            NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttaglist.tagAt(i);
+            NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttaglist.getCompoundTagAt(i);// .tagAt(i);
             byte b0 = nbttagcompound1.getByte("Slot");
 
             if (b0 >= 0 && b0 < this.itemStacks.length)
@@ -169,7 +168,6 @@ public class StoneKineticEnergyCubeTileEntity extends BaseKineticEnergyCubeTileE
 
         this.furnaceBurnTime = par1NBTTagCompound.getShort("BurnTime");
         this.furnaceCookTime = par1NBTTagCompound.getShort("CookTime");
-        this.currentItemBurnTime = getItemBurnTime(this.itemStacks[1]);
 
         if (par1NBTTagCompound.hasKey("CustomName"))
         {
@@ -256,63 +254,7 @@ public class StoneKineticEnergyCubeTileEntity extends BaseKineticEnergyCubeTileE
      */
     public void updateEntity()
     {
-        boolean flag = this.furnaceBurnTime > 0;
-        boolean flag1 = false;
-
-        if (this.furnaceBurnTime > 0)
-        {
-            --this.furnaceBurnTime;
-        }
-
-        if (!this.worldObj.isRemote)
-        {
-            if (this.furnaceBurnTime == 0 && this.canSmelt())
-            {
-                this.currentItemBurnTime = this.furnaceBurnTime = getItemBurnTime(this.itemStacks[1]);
-
-                if (this.furnaceBurnTime > 0)
-                {
-                    flag1 = true;
-
-                    if (this.itemStacks[1] != null)
-                    {
-                        --this.itemStacks[1].stackSize;
-
-                        if (this.itemStacks[1].stackSize == 0)
-                        {
-                            this.itemStacks[1] = this.itemStacks[1].getItem().getContainerItemStack(itemStacks[1]);
-                        }
-                    }
-                }
-            }
-
-            if (this.isBurning() && this.canSmelt())
-            {
-                ++this.furnaceCookTime;
-
-                if (this.furnaceCookTime == 200)
-                {
-                    this.furnaceCookTime = 0;
-                    this.smeltItem();
-                    flag1 = true;
-                }
-            }
-            else
-            {
-                this.furnaceCookTime = 0;
-            }
-
-            if (flag != this.furnaceBurnTime > 0)
-            {
-                flag1 = true;
-                BlockFurnace.updateFurnaceBlockState(this.furnaceBurnTime > 0, this.worldObj, this.xCoord, this.yCoord, this.zCoord);
-            }
-        }
-
-        if (flag1)
-        {
-            this.onInventoryChanged();
-        }
+        
     }
 
     /**
@@ -363,66 +305,11 @@ public class StoneKineticEnergyCubeTileEntity extends BaseKineticEnergyCubeTileE
     }
 
     /**
-     * Returns the number of ticks that the supplied fuel item will keep the furnace burning, or 0 if the item isn't
-     * fuel
-     */
-    public static int getItemBurnTime(ItemStack par0ItemStack)
-    {
-        if (par0ItemStack == null)
-        {
-            return 0;
-        }
-        else
-        {
-            int i = par0ItemStack.getItem().itemID;
-            Item item = par0ItemStack.getItem();
-
-            if (par0ItemStack.getItem() instanceof ItemBlock && Block.blocksList[i] != null)
-            {
-                Block block = Block.blocksList[i];
-
-                if (block == Block.woodSingleSlab)
-                {
-                    return 150;
-                }
-
-                if (block.blockMaterial == Material.wood)
-                {
-                    return 300;
-                }
-
-                if (block == Block.coalBlock)
-                {
-                    return 16000;
-                }
-            }
-
-            if (item instanceof ItemTool && ((ItemTool) item).getToolMaterialName().equals("WOOD")) return 200;
-            if (item instanceof ItemSword && ((ItemSword) item).getToolMaterialName().equals("WOOD")) return 200;
-            if (item instanceof ItemHoe && ((ItemHoe) item).getMaterialName().equals("WOOD")) return 200;
-            if (i == Item.stick.itemID) return 100;
-            if (i == Item.coal.itemID) return 1600;
-            if (i == Item.bucketLava.itemID) return 20000;
-            if (i == Block.sapling.blockID) return 100;
-            if (i == Item.blazeRod.itemID) return 2400;
-            return GameRegistry.getFuelValue(par0ItemStack);
-        }
-    }
-
-    /**
-     * Return true if item is a fuel source (getItemBurnTime() > 0).
-     */
-    public static boolean isItemFuel(ItemStack par0ItemStack)
-    {
-        return getItemBurnTime(par0ItemStack) > 0;
-    }
-
-    /**
      * Do not make give this method the name canInteractWith because it clashes with Container
      */
     public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)
     {
-        return this.worldObj.getBlockTileEntity(this.xCoord, this.yCoord, this.zCoord) != this ? false : par1EntityPlayer.getDistanceSq((double)this.xCoord + 0.5D, (double)this.yCoord + 0.5D, (double)this.zCoord + 0.5D) <= 64.0D;
+    	return true;
     }
 
     public void openChest() {}
@@ -434,7 +321,7 @@ public class StoneKineticEnergyCubeTileEntity extends BaseKineticEnergyCubeTileE
      */
     public boolean isItemValidForSlot(int par1, ItemStack par2ItemStack)
     {
-        return par1 == 2 ? false : (par1 == 1 ? isItemFuel(par2ItemStack) : true);
+    	return true;
     }
 
     /**
@@ -462,6 +349,6 @@ public class StoneKineticEnergyCubeTileEntity extends BaseKineticEnergyCubeTileE
      */
     public boolean canExtractItem(int par1, ItemStack par2ItemStack, int par3)
     {
-        return par3 != 0 || par1 != 1 || par2ItemStack.itemID == Item.bucketEmpty.itemID;
+        return true;
     }
 }

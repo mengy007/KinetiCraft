@@ -33,8 +33,8 @@ public class GuiStoneKineticEnergyCube extends GuiContainer
     protected void drawGuiContainerForegroundLayer(int par1, int par2)
     {
         String s = "Stone";
-        this.fontRenderer.drawString(s, this.xSize / 2 - this.fontRenderer.getStringWidth(s) / 2, 6, 4210752);
-        this.fontRenderer.drawString(I18n.getString("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
+        this.fontRendererObj.drawString(s, this.xSize / 2 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);
+        //this.fontRendererObj.drawString(I18n.getString("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
     }
 
     /**

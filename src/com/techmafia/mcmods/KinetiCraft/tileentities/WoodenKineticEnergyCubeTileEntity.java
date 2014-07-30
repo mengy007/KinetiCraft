@@ -7,24 +7,40 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 
-public class WoodenKineticEnergyCubeTileEntity extends TileEntity implements IInventory {
+import com.techmafia.mcmods.KinetiCraft.utility.LogHelper;
+
+public class WoodenKineticEnergyCubeTileEntity extends BaseKineticEnergyCubeTileEntity implements IInventory {
 	protected ItemStack[] energyCores = new ItemStack[1];
 
-	public WoodenKineticEnergyCubeTileEntity() {
-		System.out.println("Constructor for Wooden Kinetic Energy Cube Tile Entity!");
+	public WoodenKineticEnergyCubeTileEntity()
+	{
+		super();
+		LogHelper.info("Wooden Kinetic Energy Cube tile entity created!");
+	}
+	
+	@Override
+	public void openInventory()
+	{
+		
+	}
+	
+	@Override
+	public void closeInventory()
+	{
+		
 	}
 	
 	@Override
 	public void writeToNBT(NBTTagCompound par1NBTTagCompound)
 	{
 		super.writeToNBT(par1NBTTagCompound);
+		
 		NBTTagList nbttaglist = new NBTTagList();
 
 		for (int i = 0; i < this.energyCores.length; ++i)
 		{
 			if (this.energyCores[i] != null)
 			{
-				System.out.println("core in slot!");
 				NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 				nbttagcompound1.setByte("Slot", (byte)i);
 				this.energyCores[i].writeToNBT(nbttagcompound1);
@@ -35,27 +51,30 @@ public class WoodenKineticEnergyCubeTileEntity extends TileEntity implements IIn
 		}
 	
 		par1NBTTagCompound.setTag("Cores", nbttaglist);
+		
+		LogHelper.info("end of wooden tile entity write to nbt");
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound par1NBTTagCompound)
 	{
-	   super.readFromNBT(par1NBTTagCompound);
-	   NBTTagList nbttaglist = par1NBTTagCompound.getTagList("Cores");
-       this.energyCores = new ItemStack[1];
+		super.readFromNBT(par1NBTTagCompound);
+	   
+		NBTTagList nbttaglist = par1NBTTagCompound.getTagList("Cores", 10);
+		this.energyCores = new ItemStack[1];
        
-       System.out.println("Core count: " + nbttaglist.tagCount());
-       
-       for (int i = 0; i < nbttaglist.tagCount(); ++i)
-       {
-           NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttaglist.tagAt(i);
-           int j = nbttagcompound1.getByte("Slot") & 255;
+		for (int i = 0; i < nbttaglist.tagCount(); ++i)
+		{
+			NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttaglist.getCompoundTagAt(i);// .tagAt(i);
+			int j = nbttagcompound1.getByte("Slot") & 255;
 
-           if (j >= 0 && j < this.energyCores.length)
-           {
-               this.energyCores[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
-           }
-       }
+			if (j >= 0 && j < this.energyCores.length)
+			{
+				this.energyCores[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
+			}
+		}
+		
+		LogHelper.info("end of wooden tile entity read from nbt");
 	}
 	
 	@Override
@@ -106,18 +125,6 @@ public class WoodenKineticEnergyCubeTileEntity extends TileEntity implements IIn
 	}
 
 	@Override
-	public String getInvName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isInvNameLocalized() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public int getInventoryStackLimit() {
 		// TODO Auto-generated method stub
 		return 1;
@@ -130,19 +137,19 @@ public class WoodenKineticEnergyCubeTileEntity extends TileEntity implements IIn
 	}
 
 	@Override
-	public void openChest() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void closeChest() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public boolean isItemValidForSlot(int i, ItemStack itemstack) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public String getInventoryName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean hasCustomInventoryName() {
 		// TODO Auto-generated method stub
 		return false;
 	}

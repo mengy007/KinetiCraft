@@ -1,38 +1,42 @@
 package com.techmafia.mcmods.KinetiCraft;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
-import com.techmafia.mcmods.KinetiCraft.blocks.StoneKineticEnergyCube;
-import com.techmafia.mcmods.KinetiCraft.blocks.WoodenKineticEnergyCube;
-import com.techmafia.mcmods.KinetiCraft.gui.EnergyCubeGuiHandler;
-import com.techmafia.mcmods.KinetiCraft.items.WoodenKineticEnergyCore;
-import com.techmafia.mcmods.KinetiCraft.tileentities.StoneKineticEnergyCubeTileEntity;
-import com.techmafia.mcmods.KinetiCraft.tileentities.WoodenKineticEnergyCubeTileEntity;
+import com.techmafia.mcmods.KinetiCraft.handlers.ConfigurationHandler;
+import com.techmafia.mcmods.KinetiCraft.handlers.EnergyCubeGuiHandler;
+import com.techmafia.mcmods.KinetiCraft.init.ModBlocks;
+import com.techmafia.mcmods.KinetiCraft.init.ModItems;
+import com.techmafia.mcmods.KinetiCraft.proxy.IProxy;
+import com.techmafia.mcmods.KinetiCraft.reference.Reference;
+import com.techmafia.mcmods.KinetiCraft.utility.LogHelper;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
-@Mod(modid = KinetiCraft.modid, name = "Mengy007_KinetiCraft", version = "1.0")
-@NetworkMod(clientSideRequired = true, serverSideRequired = true)
+@Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.VERSION, guiFactory = Reference.GUI_FACTOR_CLASS)
+//@NetworkMod(clientSideRequired = true, serverSideRequired = true)
 
 public class KinetiCraft {
-	@Instance("Mengy007_KinetiCraft")
-	public static KinetiCraft instance = new KinetiCraft();
 	
-	// define modid
-	public static final String modid = "Mengy007_KinetiCraft";
-
+	@Instance(Reference.MOD_ID)
+	public static KinetiCraft instance;
+	
+	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
+	public static IProxy proxy;
+	
 	// define items
 	public static Item WoodenKineticEnergyCore;
 	public static Item StoneKineticEnergyCore;
@@ -47,39 +51,52 @@ public class KinetiCraft {
 	// define tile entities
 	public static TileEntity BasicKineticEnergyCubeTileEntity;
 	
-	@EventHandler
+	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent preInitEvent) {
+		/* Config */
+		ConfigurationHandler.init(preInitEvent.getSuggestedConfigurationFile());
+		FMLCommonHandler.instance().bus().register(new ConfigurationHandler());
+		
 		/* Init Items */
-		WoodenKineticEnergyCore = new WoodenKineticEnergyCore(4701);
+		ModItems.init();
+		
+		/*
+		WoodenKineticEnergyCore = new WoodenKineticEnergyCore();
 		WoodenKineticEnergyCore.setMaxStackSize(1).setUnlocalizedName("BasicKineticEnergyCubeItem").setCreativeTab(CreativeTabs.tabRedstone).setTextureName("KinetiCraft:woodenKineticEnergyCore");
+		*/
 		
 		//StoneKineticEnergyCore = new StoneKineticEnergyCore()
 		
 		/* Register Items */
-		GameRegistry.registerItem(WoodenKineticEnergyCore, "WoodenKineticEnergyCore");
+		//GameRegistry.registerItem(WoodenKineticEnergyCore, "WoodenKineticEnergyCore");
 
 		/* Init blocks */
-		WoodenKineticEnergyCube = new WoodenKineticEnergyCube(3701, Material.wood).setUnlocalizedName("WoodenKineticEnergyCube").setCreativeTab(CreativeTabs.tabRedstone).setTextureName("KinetiCraft:woodenKineticEnergyCube");
-		StoneKineticEnergyCube = new StoneKineticEnergyCube(3702, Material.wood).setUnlocalizedName("StoneKineticEnergyCube").setCreativeTab(CreativeTabs.tabRedstone).setTextureName("KinetiCraft:stoneKineticEnergyCube0");
+		ModBlocks.init();
+
+		LogHelper.info("Pre Initialization Complete!");
+		
+		//WoodenKineticEnergyCube = new WoodenKineticEnergyCube( Material.wood).setBlockName("WoodenKineticEnergyCube").setCreativeTab(CreativeTabs.tabRedstone).setBlockTextureName("KinetiCraft:woodenKineticEnergyCube");
+		//StoneKineticEnergyCube = new StoneKineticEnergyCube(Material.wood).setBlockName("StoneKineticEnergyCube").setCreativeTab(CreativeTabs.tabRedstone).setBlockTextureName("KinetiCraft:stoneKineticEnergyCube0");
 		
 		/* Register blocks */
-		GameRegistry.registerBlock(WoodenKineticEnergyCube, this.modid + WoodenKineticEnergyCube.getUnlocalizedName().substring(5));
-		GameRegistry.registerBlock(StoneKineticEnergyCube, this.modid + StoneKineticEnergyCube.getUnlocalizedName().substring(5));
+		//GameRegistry.registerBlock(WoodenKineticEnergyCube, Reference.MOD_ID + WoodenKineticEnergyCube.getUnlocalizedName().substring(5));
+		//GameRegistry.registerBlock(StoneKineticEnergyCube, Reference.MOD_ID + StoneKineticEnergyCube.getUnlocalizedName().substring(5));
 
 		/* Register tile entities */
-		GameRegistry.registerTileEntity(WoodenKineticEnergyCubeTileEntity.class, "WoodenKineticEnergyCubeTileEntity");
-		GameRegistry.registerTileEntity(StoneKineticEnergyCubeTileEntity.class, "StoneKineticEnergyCubeTileEntity");
+		proxy.registerTileEntities();
+		//GameRegistry.registerTileEntity(WoodenKineticEnergyCubeTileEntity.class, "WoodenKineticEnergyCubeTileEntity");
+		//GameRegistry.registerTileEntity(StoneKineticEnergyCubeTileEntity.class, "StoneKineticEnergyCubeTileEntity");
 		
 		/* Register GUI stuff */
-		NetworkRegistry.instance().registerGuiHandler(this.instance, new EnergyCubeGuiHandler());
+		NetworkRegistry.INSTANCE.registerGuiHandler(this.instance, new EnergyCubeGuiHandler());
 		
 		/* Items Crafting Recipes */
 		GameRegistry.addRecipe(new ItemStack(WoodenKineticEnergyCore, 1), new Object[]{
 			" W ",
 			"WRW",
 			" W ",
-			'W', Block.planks,
-			'R', Item.redstone
+			'W', Blocks.planks,
+			'R', Items.redstone
 		});
 
 		/* Blocks Crafting Recipes */
@@ -87,8 +104,8 @@ public class KinetiCraft {
 			"WWW",
 			"WLW",
 			"WWW",
-			'W', Block.planks,
-			'L', Block.lever
+			'W', Blocks.planks,
+			'L', Blocks.lever
 		});
 		/*
 		GameRegistry.addRecipe(new ItemStack(StoneKineticEnergyCube, 1), new Object[]{
@@ -122,13 +139,26 @@ public class KinetiCraft {
 		*/
 	}
 	
-	@EventHandler
-	public void load(FMLInitializationEvent event) {
+	@Mod.EventHandler
+	public void load(FMLInitializationEvent event)
+	{
 		// init blocks
 		
 		//NetworkRegistry.instance().registerGuiHandler(this.instance, new WoodenKineticEnergyCubeGuiHandler());
 		
 		//GameRegistry.registerTileEntity(WoodenKineticEnergyCubeTileEntity.class, "WoodenKineticEnergyCubeTileEntity");
 		//GameRegistry.registerTileEntity(StoneKineticEnergyCubeTileEntity.class, "StoneKineticEnergyCubeTileEntity");
+	}
+
+	@Mod.EventHandler
+	public void init(FMLInitializationEvent event)
+	{
+		LogHelper.info("Init event complete.");
+	}
+	
+	@Mod.EventHandler
+	public void postInit(FMLPostInitializationEvent event)
+	{
+		LogHelper.info("Post Init event complete.");
 	}
 }
