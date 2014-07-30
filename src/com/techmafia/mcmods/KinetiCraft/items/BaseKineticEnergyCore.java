@@ -3,20 +3,18 @@ package com.techmafia.mcmods.KinetiCraft.items;
 import java.util.List;
 
 import net.minecraft.client.renderer.texture.IIconRegister;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
 import com.techmafia.mcmods.KinetiCraft.creativetab.CreativeTabKC;
 import com.techmafia.mcmods.KinetiCraft.reference.Reference;
-import com.techmafia.mcmods.KinetiCraft.utility.LogHelper;
 import com.techmafia.mcmods.KinetiCraft.utility.NBTHelper;
 
 import cpw.mods.fml.relauncher.Side;
@@ -31,17 +29,14 @@ public class BaseKineticEnergyCore extends Item
 	protected float prevDistanceWalkedModified = 0;
 	public int maxEnergy = 0;
 	protected IIcon icons[] = new IIcon[6];
+	protected boolean hasMultipleIcons = false;
+	protected float damageFromOverChargeExplosion = 0;
 
 	public BaseKineticEnergyCore() {
 		super();
 		this.maxStackSize = 1;
 		this.setCreativeTab(CreativeTabKC.KC_TAB);
 		this.setNoRepair();
-	}
-
-	protected boolean hasMultipleIcons()
-	{
-		return false;
 	}
 	
 	/**
@@ -63,6 +58,36 @@ public class BaseKineticEnergyCore extends Item
 			if (energyStored < this.maxEnergy)
 			{
 				energyStored += this.energyFromUsing;
+				
+				// play sound if max is hit
+				if (energyStored >= this.maxEnergy)
+				{
+					entityLiving.playSound("random.orb", 1, 1);
+				}
+			}
+			else
+			{
+				// Handle over charging. Note: players can currently only over charge from swinging
+				if ( ! NBTHelper.hasTag(itemStack, "overCharge"))
+				{
+					NBTHelper.setInteger(itemStack, "overCharge", 0);
+				}
+				
+				int overCharge = NBTHelper.getInt(itemStack, "overCharge");
+				
+				overCharge += this.energyFromUsing;
+				
+				if (overCharge > this.overChargeBuffer)
+				{
+					// KaBOOM!
+					//(EntityPlayer)entityLiving.inventory;
+					((EntityPlayer)entityLiving).destroyCurrentEquippedItem();
+					
+					entityLiving.attackEntityFrom(DamageSource.generic, this.damageFromOverChargeExplosion);
+					entityLiving.playSound("random.explode", 1, 1);
+				}
+				
+				NBTHelper.setInteger(itemStack, "overCharge", overCharge);
 			}
 			
 			if (energyStored > this.maxEnergy) { energyStored = this.maxEnergy; }
@@ -126,6 +151,12 @@ public class BaseKineticEnergyCore extends Item
 					if (energyStored > this.maxEnergy) { energyStored = this.maxEnergy; }
 
 					NBTHelper.setInteger(itemStack, "energyStored", energyStored);
+					
+					// play sound if max is hit
+					if (energyStored >= this.maxEnergy)
+					{
+						entity.playSound("random.orb", 1, 1);
+					}
 				}
 			}
 			else
@@ -141,6 +172,12 @@ public class BaseKineticEnergyCore extends Item
 		prevDistanceWalkedModified = ep.distanceWalkedModified;
 		
 		this.setDamage(itemStack, this.maxEnergy - energyStored);
+		
+		// reset overcharge if item looses full charge
+		if (NBTHelper.hasTag(itemStack, "overCharge") && energyStored < this.maxEnergy)
+		{
+			NBTHelper.setInteger(itemStack, "overCharge", 0);
+		}
     }
 	
 	@Override
@@ -159,7 +196,7 @@ public class BaseKineticEnergyCore extends Item
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister iconRegister)
 	{
-		if (this.hasMultipleIcons())
+		if (this.hasMultipleIcons)
 		{
 			for (int i = 0; i < 6; i++)
 			{
@@ -180,7 +217,7 @@ public class BaseKineticEnergyCore extends Item
     @Override
     public IIcon getIconFromDamage(int damage)
     {
-    	if (this.hasMultipleIcons())
+    	if (this.hasMultipleIcons)
     	{
         	int level = (this.maxEnergy - damage) / (this.maxEnergy / 5);
         	

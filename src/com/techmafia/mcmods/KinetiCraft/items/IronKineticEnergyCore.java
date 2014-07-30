@@ -8,18 +8,14 @@ public class IronKineticEnergyCore extends BaseKineticEnergyCore
 		
 		this.setUnlocalizedName("ironKineticEnergyCore");
 		
-		this.energyFromJumping = 2;
-		this.energyFromMoving = 4;
-		this.energyFromUsing = 10;
-		this.overChargeBuffer = 20;
-		this.maxEnergy=5000;
+		this.energyFromJumping 				= 2;
+		this.energyFromMoving 				= 4;
+		this.energyFromUsing 				= 10;
+		this.overChargeBuffer				= 20;
+		this.maxEnergy						= 5000;
+		this.hasMultipleIcons				= true;
+		this.damageFromOverChargeExplosion	= 2.0f;
 		
 		this.setMaxDamage(this.maxEnergy);
-	}
-	
-	@Override
-	protected boolean hasMultipleIcons()
-	{
-		return true;
 	}
 }
